@@ -1,6 +1,10 @@
 package com.edward.googleimagesearch.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +14,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.edward.googleimagesearch.R;
@@ -34,6 +39,7 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
     private GridView gvImages;
     private ArrayList<ImageResult> imageResults;
     private ImageResultsAdapter aImageResults;
+    MenuItem miActionProgressItem;
 
     public SearchFilter searchFilter;
 
@@ -49,6 +55,7 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
         aImageResults = new ImageResultsAdapter(this, imageResults);
         gvImages.setAdapter(aImageResults);
 
+        // endless scroll for gridview
         gvImages.setOnScrollListener(new EndlessScrollListener() {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
@@ -65,14 +72,14 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
         gvImages.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // create an intent
-                Intent i = new Intent(GoogleImageSearchActivity.this, ImageDisplayActivity.class);
-                // get image result
-                ImageResult result = imageResults.get(position);
-                // pass image result into intent
-                i.putExtra("ImageResult", (ImageResult) aImageResults.getItem(position));
-                // launch new activity
-                startActivity(i);
+            // create an intent
+            Intent i = new Intent(GoogleImageSearchActivity.this, ImageDisplayActivity.class);
+            // get image result
+            ImageResult result = imageResults.get(position);
+            // pass image result into intent
+            i.putExtra("ImageResult", (ImageResult) aImageResults.getItem(position));
+            // launch new activity
+            startActivity(i);
             }
         });
     }
@@ -83,12 +90,18 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
     }
 
     public void searchImages(int page) {
+
+        if(!isNetworkAvailable()) {
+            Toast.makeText(this, "Sorry, network connectivity is not available", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        miActionProgressItem.setVisible(true);
+
         String query = etSearchText.getText().toString();
-
-        AsyncHttpClient client = new AsyncHttpClient();
-
         String url = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" + query + "&rsz=" + resultsPerPage + "&start=" + (page * resultsPerPage);
 
+        // add optional query params
         if(searchFilter.imgsz != null && !searchFilter.imgsz.isEmpty()) {
             url += "&imgsz=" + searchFilter.imgsz;
         }
@@ -105,8 +118,9 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
             url += "&as_sitesearch=" + searchFilter.as_sitesearch;
         }
 
-        Toast.makeText(this, url, Toast.LENGTH_LONG).show();
+        AsyncHttpClient client = new AsyncHttpClient();
 
+        // get JSON response
         client.get(url, null, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -114,14 +128,16 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
                 try {
                     imageResultsJSON = response.getJSONObject("responseData").getJSONArray("results");
                     aImageResults.addAll(ImageResult.fromJSONArray(imageResultsJSON));
-                } catch(JSONException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                miActionProgressItem.setVisible(false);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
                 Log.i("INFO", "Failed");
+                miActionProgressItem.setVisible(false);
             }
         });
     }
@@ -152,6 +168,21 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    // check network connectivity
+    private Boolean isNetworkAvailable() {
+        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        miActionProgressItem = menu.findItem(R.id.miActionProgress);
+        ProgressBar v =  (ProgressBar) MenuItemCompat.getActionView(miActionProgressItem);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    // launch edit settings intent to get an intent
     private void launchEditSettingsActivity() {
         Intent i = new Intent(GoogleImageSearchActivity.this, EditSettingsActivity.class);
         i.putExtra("SearchFilter", searchFilter);
@@ -161,6 +192,7 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == RESULT_OK && requestCode == EDIT_SETTINGS_REQUEST_CODE) {
+            // get the modified settings from intent as a parcelable
             searchFilter = data.getParcelableExtra("SearchFilter");
             Toast.makeText(this, "Your settings have been saved!", Toast.LENGTH_SHORT).show();
         }
