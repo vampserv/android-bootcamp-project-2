@@ -22,6 +22,7 @@ import com.edward.googleimagesearch.adapters.EndlessScrollListener;
 import com.edward.googleimagesearch.adapters.ImageResultsAdapter;
 import com.edward.googleimagesearch.models.ImageResult;
 import com.edward.googleimagesearch.models.SearchFilter;
+import com.etsy.android.grid.StaggeredGridView;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -36,7 +37,7 @@ import java.util.ArrayList;
 public class GoogleImageSearchActivity extends ActionBarActivity {
 
     private EditText etSearchText;
-    private GridView gvImages;
+    private StaggeredGridView gvImages;
     private ArrayList<ImageResult> imageResults;
     private ImageResultsAdapter aImageResults;
     MenuItem miActionProgressItem;
@@ -68,7 +69,7 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
 
     private void setupViews() {
         etSearchText = (EditText) findViewById(R.id.etSearchText);
-        gvImages = (GridView) findViewById(R.id.gvImages);
+        gvImages = (StaggeredGridView) findViewById(R.id.gvImages);
         gvImages.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -90,11 +91,6 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
     }
 
     public void searchImages(int page) {
-
-        if(!isNetworkAvailable()) {
-            Toast.makeText(this, "Sorry, network connectivity is not available", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
         miActionProgressItem.setVisible(true);
 

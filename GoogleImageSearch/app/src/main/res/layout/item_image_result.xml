@@ -1,22 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent" android:layout_height="fill_parent"
-    android:orientation="vertical">
+    android:layout_width="fill_parent" android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/dropshadow"
+    android:paddingBottom="5px"
+    android:paddingLeft="6px"
+    android:paddingRight="5px"
+    android:paddingTop="5px">
 
-    <ImageView
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:scaleType="fitXY"
-        android:layout_gravity="center"
-        android:adjustViewBounds="true"
+    <!--<ImageView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:scaleType="centerInside"-->
+        <!--android:adjustViewBounds="true"-->
+        <!--android:id="@+id/ivImage"-->
+        <!--android:src="@mipmap/ic_launcher" />-->
+
+    <com.edward.googleimagesearch.helpers.DynamicImageView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
         android:id="@+id/ivImage"
+        android:layout_margin="1dp"
+        android:layout_marginTop="1px"
+        android:layout_marginLeft="1px"
+        android:layout_marginRight="1px"
+        android:layout_marginBottom="0px"
         android:src="@mipmap/ic_launcher" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxLines="2"
+        android:maxLines="1"
+        android:scrollHorizontally="true"
+        android:ellipsize="end"
+        android:background="#fff"
+        android:textSize="12sp"
         android:id="@+id/tvTitle"
-        android:text="@string/item_title_label" />
+        android:layout_marginTop="-3dp"
+        android:layout_marginLeft="1px"
+        android:layout_marginRight="1px"
+        android:layout_marginBottom="1px"
+        android:text="@string/item_title_label"
+        android:padding="5dp" />
 
 </LinearLayout>

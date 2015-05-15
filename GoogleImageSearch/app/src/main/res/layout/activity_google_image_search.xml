@@ -1,7 +1,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.edward.googleimagesearch.activities.GoogleImageSearchActivity">
+    tools:context="com.edward.googleimagesearch.activities.GoogleImageSearchActivity"
+    android:background="#ccc">
 
     <EditText
         android:layout_width="wrap_content"
@@ -25,13 +26,27 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <GridView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <!--<GridView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/gvImages"-->
+        <!--android:layout_below="@+id/etSearchText"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_alignParentEnd="true"-->
+        <!--android:numColumns="3" />-->
+
+    <com.etsy.android.grid.StaggeredGridView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/gvImages"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/etSearchText"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:numColumns="3" />
+        app:item_margin="8dp"
+        app:column_count="2" />
+
 </RelativeLayout>

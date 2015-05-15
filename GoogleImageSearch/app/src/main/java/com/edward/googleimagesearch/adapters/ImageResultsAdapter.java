@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.edward.googleimagesearch.R;
+import com.edward.googleimagesearch.helpers.DynamicImageView;
 import com.edward.googleimagesearch.models.ImageResult;
 import com.squareup.picasso.Picasso;
 
@@ -29,7 +30,7 @@ public class ImageResultsAdapter extends ArrayAdapter<ImageResult> {
         if(convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_image_result, parent, false);
         }
-        ImageView ivImage = (ImageView) convertView.findViewById(R.id.ivImage);
+        DynamicImageView ivImage = (DynamicImageView) convertView.findViewById(R.id.ivImage);
         TextView tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
         ivImage.setImageResource(0);
         tvTitle.setText(Html.fromHtml(imageInfo.title));
