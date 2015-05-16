@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.method.Touch;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,9 +31,10 @@ public class ImageDisplayActivity extends ActionBarActivity {
 
         ImageResult result = getIntent().getParcelableExtra("ImageResult");
 
+        setTitle((Html.fromHtml(result.title)));
+
         ivImage = (TouchImageView) findViewById(R.id.ivImage);
         Picasso.with(this).load(result.fullUrl).into(ivImage);
-
     }
 
     public void onShareClick() {
@@ -72,4 +74,5 @@ public class ImageDisplayActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }

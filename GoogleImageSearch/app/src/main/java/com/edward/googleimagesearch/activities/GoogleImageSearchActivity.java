@@ -36,6 +36,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class GoogleImageSearchActivity extends ActionBarActivity {
@@ -50,31 +52,39 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
     public String searchQuery;
 
     private final int EDIT_SETTINGS_REQUEST_CODE = 100;
-    private int resultsPerPage = 8;
+    private int RESULTS_PER_PAGE = 8;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_google_image_search);
         setupViews();
-        imageResults = new ArrayList<ImageResult>();
+
+        imageResults = new ArrayList<>();
         aImageResults = new ImageResultsAdapter(this, imageResults);
         gvImages.setAdapter(aImageResults);
 
-        // endless scroll for gridview
-        gvImages.setOnScrollListener(new EndlessScrollListener() {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount) {
-                searchImages(page);
-            }
-        });
-
         searchFilter = new SearchFilter();
+
+        // check for saved state
+        if (savedInstanceState != null) {
+            Toast.makeText(this, "WTF", Toast.LENGTH_SHORT).show();
+            // restore state
+            searchQuery = savedInstanceState.getString("searchQuery");
+            searchFilter = savedInstanceState.getParcelable("searchFilter");
+            // set saved views
+            etSearchText.setText(searchQuery);
+            // perform search with saved query
+            searchImages(0);
+        }
+
     }
 
     private void setupViews() {
 //        etSearchText = (EditText) findViewById(R.id.etSearchText);
         gvImages = (StaggeredGridView) findViewById(R.id.gvImages);
+        // listen for item click
         gvImages.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -88,6 +98,14 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
                 startActivity(i);
             }
         });
+        // listen for scroll
+        gvImages.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                searchImages(page);
+            }
+        });
+
     }
 
     public void searchImages(int page) {
@@ -99,19 +117,27 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
 
         miActionProgressItem.setVisible(true);
 
-//        String query = etSearchText.getText().toString();
-        String url = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" + searchQuery + "&rsz=" + resultsPerPage + "&start=" + (page * resultsPerPage);
+        if (searchQuery == null) {
+            Toast.makeText(this, "Please enter a search query", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String url = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" +
+                searchQuery + "&rsz=" +
+                RESULTS_PER_PAGE + "&start=" +
+                (page * RESULTS_PER_PAGE);
 
         // add optional query params
-        if(searchFilter.imgsz != null && searchFilter.imgsz != "any") {
+        List invalids = Arrays.asList("any", "null");
+        if(searchFilter.imgsz != null && !invalids.contains(searchFilter.imgsz)) {
             url += "&imgsz=" + searchFilter.imgsz;
         }
 
-        if(searchFilter.imgcolor != null && searchFilter.imgcolor != "any") {
+        if(searchFilter.imgcolor != null && !invalids.contains(searchFilter.imgcolor)) {
             url += "&imgcolor=" + searchFilter.imgcolor;
         }
 
-        if(searchFilter.imgtype != null && searchFilter.imgtype != "any") {
+        if(searchFilter.imgtype != null && !invalids.contains(searchFilter.imgtype)) {
             url += "&imgtype=" + searchFilter.imgtype;
         }
 
@@ -126,11 +152,19 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 JSONArray imageResultsJSON = null;
+                JSONObject responseData;
+                String responseDetails = null;
                 try {
-                    imageResultsJSON = response.getJSONObject("responseData").getJSONArray("results");
+                    responseDetails = response.getString("responseDetails");
+                    responseData = response.getJSONObject("responseData");
+                    imageResultsJSON = responseData.getJSONArray("results");
                     aImageResults.addAll(ImageResult.fromJSONArray(imageResultsJSON));
                 } catch (JSONException e) {
-                    Toast.makeText(GoogleImageSearchActivity.this, "Error parsing results, please try again later", Toast.LENGTH_SHORT).show();
+                    if (responseDetails != null) {
+                        Toast.makeText(GoogleImageSearchActivity.this, responseDetails, Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(GoogleImageSearchActivity.this, "Error parsing results, please try again later", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 miActionProgressItem.setVisible(false);
             }
@@ -154,7 +188,7 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
             public boolean onQueryTextSubmit(String query) {
                 // search images
                 searchQuery = query;
-                imageResults.clear();
+                aImageResults.clear();
                 searchImages(0);
                 return true;
             }
@@ -203,18 +237,19 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
     }
 
     // launch edit settings intent to get an intent
-    private void launchEditSettingsActivity() {
-        Intent i = new Intent(GoogleImageSearchActivity.this, EditSettingsActivity.class);
-        i.putExtra("SearchFilter", searchFilter);
-        startActivityForResult(i, EDIT_SETTINGS_REQUEST_CODE);
-    }
+//    private void launchEditSettingsActivity() {
+//        Intent i = new Intent(GoogleImageSearchActivity.this, EditSettingsActivity.class);
+//        i.putExtra("SearchFilter", searchFilter);
+//        startActivityForResult(i, EDIT_SETTINGS_REQUEST_CODE);
+//    }
 
     // launch edit settings in a dialog
     private void launchEditSettingsDialog() {
         android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
         EditSettingsDialog esd = EditSettingsDialog.newInstance(this, new EditSettingsDialogFragmentListener(){
             public void updateSettings(SearchFilter filter){
-                searchFilter = filter;
+                aImageResults.clear();
+                searchImages(0);
             }
         }, searchFilter);
         esd.show(fm, "fragment_edit_settings");
@@ -224,12 +259,21 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
         public void updateSettings(SearchFilter filter);
     }
 
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        if(resultCode == RESULT_OK && requestCode == EDIT_SETTINGS_REQUEST_CODE) {
+//            // get the modified settings from intent as a parcelable
+//            searchFilter = data.getParcelableExtra("SearchFilter");
+//            Toast.makeText(this, "Your settings have been saved!", Toast.LENGTH_SHORT).show();
+//        }
+//    }
+
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode == RESULT_OK && requestCode == EDIT_SETTINGS_REQUEST_CODE) {
-            // get the modified settings from intent as a parcelable
-            searchFilter = data.getParcelableExtra("SearchFilter");
-            Toast.makeText(this, "Your settings have been saved!", Toast.LENGTH_SHORT).show();
-        }
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putString("searchQuery", searchQuery);
+        savedInstanceState.putParcelable("searchFilter", searchFilter);
+        super.onSaveInstanceState(savedInstanceState);
     }
+
 }
