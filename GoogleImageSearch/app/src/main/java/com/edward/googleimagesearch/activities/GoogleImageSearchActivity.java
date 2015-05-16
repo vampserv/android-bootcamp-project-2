@@ -9,12 +9,14 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ProgressBar;
+import android.support.v7.widget.SearchView;
 import android.widget.Toast;
 
 import com.edward.googleimagesearch.R;
@@ -43,6 +45,7 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
     MenuItem miActionProgressItem;
 
     public SearchFilter searchFilter;
+    public String searchQuery;
 
     private final int EDIT_SETTINGS_REQUEST_CODE = 100;
     private int resultsPerPage = 8;
@@ -68,7 +71,7 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
     }
 
     private void setupViews() {
-        etSearchText = (EditText) findViewById(R.id.etSearchText);
+//        etSearchText = (EditText) findViewById(R.id.etSearchText);
         gvImages = (StaggeredGridView) findViewById(R.id.gvImages);
         gvImages.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -85,17 +88,12 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
         });
     }
 
-    public void onImageSearch(View v) {
-        imageResults.clear();
-        searchImages(0);
-    }
-
     public void searchImages(int page) {
 
         miActionProgressItem.setVisible(true);
 
-        String query = etSearchText.getText().toString();
-        String url = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" + query + "&rsz=" + resultsPerPage + "&start=" + (page * resultsPerPage);
+//        String query = etSearchText.getText().toString();
+        String url = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" + searchQuery + "&rsz=" + resultsPerPage + "&start=" + (page * resultsPerPage);
 
         // add optional query params
         if(searchFilter.imgsz != null && !searchFilter.imgsz.isEmpty()) {
@@ -142,7 +140,25 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_google_image_search, menu);
-        return true;
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // search images
+                searchQuery = query;
+                imageResults.clear();
+                searchImages(0);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
+
     }
 
     @Override

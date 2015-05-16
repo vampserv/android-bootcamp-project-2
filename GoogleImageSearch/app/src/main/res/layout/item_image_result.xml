@@ -21,7 +21,6 @@
         android:layout_height="wrap_content"
         android:scaleType="centerCrop"
         android:id="@+id/ivImage"
-        android:layout_margin="1dp"
         android:layout_marginTop="1px"
         android:layout_marginLeft="1px"
         android:layout_marginRight="1px"

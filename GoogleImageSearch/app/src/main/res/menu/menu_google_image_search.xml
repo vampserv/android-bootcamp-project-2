@@ -4,18 +4,26 @@
     tools:context="com.edward.googleimagesearch.activities.GoogleImageSearchActivity">
 
     <item
-        android:id="@+id/miSettings"
-        android:title="Settings"
-        android:icon="@drawable/ic_settings"
-        app:showAsAction="always"
-        />
-
-    <item
         android:id="@+id/miActionProgress"
         android:title="Loading..."
         android:visible="false"
         android:orderInCategory="100"
         app:showAsAction="ifRoom"
         app:actionLayout="@layout/action_view_progress" />
+
+    <item android:id="@+id/action_search"
+        android:orderInCategory="5"
+        android:title="Search"
+        android:icon="@android:drawable/ic_menu_search"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView" />
+
+    <item
+        android:orderInCategory="6"
+        android:id="@+id/miSettings"
+        android:title="Settings"
+        android:icon="@drawable/ic_settings"
+        app:showAsAction="always"
+        />
 
 </menu>

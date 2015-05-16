@@ -16,6 +16,7 @@
     <string name="site_restriction_label">Site Filter</string>
     <string name="site_filter_placeholder">enter site hostname</string>
     <string name="save_changes_text">Save</string>
+    <string name="action_share_icon">Share</string>
 
     <string-array name="image_color_spinner_array">
         <item></item>

@@ -1,9 +1,16 @@
 package com.edward.googleimagesearch.activities;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.edward.googleimagesearch.R;
@@ -26,6 +33,20 @@ public class ImageDisplayActivity extends ActionBarActivity {
 
     }
 
+    public void onShareClick() {
+        Drawable mDrawable = ivImage.getDrawable();
+        Bitmap mBitmap = ((BitmapDrawable)mDrawable).getBitmap();
+
+        String path = MediaStore.Images.Media.insertImage(getContentResolver(), mBitmap, "Image Text", "Image Description");
+        Uri uri = Uri.parse(path);
+
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, uri);
+        shareIntent.setType("image/*");
+
+        startActivity(Intent.createChooser(shareIntent, "Share Image"));
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -42,7 +63,8 @@ public class ImageDisplayActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.miShare) {
+            onShareClick();
             return true;
         }
 
