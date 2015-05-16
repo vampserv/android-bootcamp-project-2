@@ -8,18 +8,20 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.method.Touch;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.edward.googleimagesearch.R;
+import com.edward.googleimagesearch.helpers.TouchImageView;
 import com.edward.googleimagesearch.models.ImageResult;
 import com.squareup.picasso.Picasso;
 
 public class ImageDisplayActivity extends ActionBarActivity {
 
-    public ImageView ivImage;
+    public TouchImageView ivImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +30,7 @@ public class ImageDisplayActivity extends ActionBarActivity {
 
         ImageResult result = getIntent().getParcelableExtra("ImageResult");
 
-        ivImage = (ImageView) findViewById(R.id.ivImage);
+        ivImage = (TouchImageView) findViewById(R.id.ivImage);
         Picasso.with(this).load(result.fullUrl).into(ivImage);
 
     }

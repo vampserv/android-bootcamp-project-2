@@ -1,5 +1,6 @@
 package com.edward.googleimagesearch.activities;
 
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.edward.googleimagesearch.R;
 import com.edward.googleimagesearch.adapters.EndlessScrollListener;
 import com.edward.googleimagesearch.adapters.ImageResultsAdapter;
+import com.edward.googleimagesearch.fragments.EditSettingsDialog;
 import com.edward.googleimagesearch.models.ImageResult;
 import com.edward.googleimagesearch.models.SearchFilter;
 import com.etsy.android.grid.StaggeredGridView;
@@ -76,19 +78,24 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
         gvImages.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            // create an intent
-            Intent i = new Intent(GoogleImageSearchActivity.this, ImageDisplayActivity.class);
-            // get image result
-            ImageResult result = imageResults.get(position);
-            // pass image result into intent
-            i.putExtra("ImageResult", (ImageResult) aImageResults.getItem(position));
-            // launch new activity
-            startActivity(i);
+                // create an intent
+                Intent i = new Intent(GoogleImageSearchActivity.this, ImageDisplayActivity.class);
+                // get image result
+                ImageResult result = imageResults.get(position);
+                // pass image result into intent
+                i.putExtra("ImageResult", (ImageResult) aImageResults.getItem(position));
+                // launch new activity
+                startActivity(i);
             }
         });
     }
 
     public void searchImages(int page) {
+
+        if(!isNetworkAvailable()) {
+            Toast.makeText(this, "No internet connection, please try again later", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         miActionProgressItem.setVisible(true);
 
@@ -96,15 +103,15 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
         String url = "https://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=" + searchQuery + "&rsz=" + resultsPerPage + "&start=" + (page * resultsPerPage);
 
         // add optional query params
-        if(searchFilter.imgsz != null && !searchFilter.imgsz.isEmpty()) {
+        if(searchFilter.imgsz != null && searchFilter.imgsz != "any") {
             url += "&imgsz=" + searchFilter.imgsz;
         }
 
-        if(searchFilter.imgcolor != null && !searchFilter.imgcolor.isEmpty()) {
+        if(searchFilter.imgcolor != null && searchFilter.imgcolor != "any") {
             url += "&imgcolor=" + searchFilter.imgcolor;
         }
 
-        if(searchFilter.imgtype != null && !searchFilter.imgtype.isEmpty()) {
+        if(searchFilter.imgtype != null && searchFilter.imgtype != "any") {
             url += "&imgtype=" + searchFilter.imgtype;
         }
 
@@ -123,14 +130,14 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
                     imageResultsJSON = response.getJSONObject("responseData").getJSONArray("results");
                     aImageResults.addAll(ImageResult.fromJSONArray(imageResultsJSON));
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    Toast.makeText(GoogleImageSearchActivity.this, "Error parsing results, please try again later", Toast.LENGTH_SHORT).show();
                 }
                 miActionProgressItem.setVisible(false);
             }
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Log.i("INFO", "Failed");
+                Toast.makeText(GoogleImageSearchActivity.this, "Error retrieving results, please try again later", Toast.LENGTH_SHORT).show();
                 miActionProgressItem.setVisible(false);
             }
         });
@@ -174,7 +181,8 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
         }
 
         if (id == R.id.miSettings) {
-            launchEditSettingsActivity();
+//            launchEditSettingsActivity();
+            launchEditSettingsDialog();
         }
 
         return super.onOptionsItemSelected(item);
@@ -199,6 +207,21 @@ public class GoogleImageSearchActivity extends ActionBarActivity {
         Intent i = new Intent(GoogleImageSearchActivity.this, EditSettingsActivity.class);
         i.putExtra("SearchFilter", searchFilter);
         startActivityForResult(i, EDIT_SETTINGS_REQUEST_CODE);
+    }
+
+    // launch edit settings in a dialog
+    private void launchEditSettingsDialog() {
+        android.support.v4.app.FragmentManager fm = getSupportFragmentManager();
+        EditSettingsDialog esd = EditSettingsDialog.newInstance(this, new EditSettingsDialogFragmentListener(){
+            public void updateSettings(SearchFilter filter){
+                searchFilter = filter;
+            }
+        }, searchFilter);
+        esd.show(fm, "fragment_edit_settings");
+    }
+
+    public interface EditSettingsDialogFragmentListener {
+        public void updateSettings(SearchFilter filter);
     }
 
     @Override

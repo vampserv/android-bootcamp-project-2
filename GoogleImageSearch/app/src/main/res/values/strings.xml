@@ -15,11 +15,12 @@
     <string name="image_type_label">Image Type</string>
     <string name="site_restriction_label">Site Filter</string>
     <string name="site_filter_placeholder">enter site hostname</string>
-    <string name="save_changes_text">Save</string>
+    <string name="save_changes_text">SAVE</string>
     <string name="action_share_icon">Share</string>
+    <string name="action_cancel_changes">CANCEL</string>
 
     <string-array name="image_color_spinner_array">
-        <item></item>
+        <item>any</item>
         <item>black</item>
         <item>blue</item>
         <item>brown</item>
@@ -35,7 +36,7 @@
     </string-array>
 
     <string-array name="image_size_spinner_array">
-        <item></item>
+        <item>any</item>
         <item>icon</item>
         <item>small</item>
         <item>medium</item>
@@ -46,7 +47,7 @@
     </string-array>
 
     <string-array name="image_type_spinner_array">
-        <item></item>
+        <item>any</item>
         <item>face</item>
         <item>photo</item>
         <item>clipart</item>

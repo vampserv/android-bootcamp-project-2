@@ -3,16 +3,23 @@
     android:layout_height="match_parent"
     tools:context="com.edward.googleimagesearch.ImageDisplayActivity">
 
-    <ImageView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+    <!--<ImageView-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/ivImage"-->
+        <!--android:scaleType="fitCenter"-->
+        <!--android:adjustViewBounds="true"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_alignParentStart="true" />-->
+
+    <com.edward.googleimagesearch.helpers.TouchImageView
         android:id="@+id/ivImage"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
         android:scaleType="fitCenter"
-        android:adjustViewBounds="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentStart="true" />
+        />
 
 </RelativeLayout>
